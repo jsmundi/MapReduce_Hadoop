@@ -1,0 +1,25 @@
+
+echo "****************************************************************************************"
+echo " MAKING HDFS "
+echo "****************************************************************************************"
+hadoop fs -mkdir /user/cloudera
+hadoop fs -mkdir /user/cloudera/LogHW
+hadoop fs -mkdir /user/cloudera/LogHW/popWeb /user/cloudera/LogHW/popWeb/input
+hadoop fs -put ../cs453-hw2-dataset/access_log/ /user/cloudera/LogHW/popWeb/input
+
+echo "****************************************************************************************"
+echo " BUILDING JAVA "
+echo "****************************************************************************************"
+mkdir -p build
+javac -cp /usr/lib/hadoop/*:/usr/lib/hadoop-mapreduce/* popWeb.java -d build -Xlint 
+jar -cvf popWeb.jar -C build/ . 
+
+echo "****************************************************************************************"
+echo " RUN HADOOP "
+echo "****************************************************************************************"
+hadoop fs -rm -r /user/cloudera/LogHW/popWeb/output/
+hadoop jar popWeb.jar org.myorg.popWeb /user/cloudera/LogHW/popWeb/input /user/cloudera/LogHW/popWeb/output
+
+echo "****************************************************************************************"
+echo "****************************************************************************************"
+hadoop fs -cat /user/cloudera/LogHW/popWeb/output/*
